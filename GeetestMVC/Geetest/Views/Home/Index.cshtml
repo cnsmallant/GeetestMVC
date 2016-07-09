@@ -1,0 +1,112 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>极验验证MVC版-小蚂蚁技术联盟QQ群： 247844859</title>
+    <script src="~/js/jquery.min.js"></script>
+    <script src="~/js/gt.js"></script>
+    <style>
+        .div_content {
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 100px;
+            width: 300px;
+            height: 400px;
+            text-align:center;
+        }
+
+            .div_content div {
+                width: 100%;
+                line-height: 45px;
+                float: left;
+            }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="div_content">
+            <p><h1>极验验证MVC版</h1></p>
+            <p><h3>小蚂蚁技术联盟QQ群247844859</h3></p>
+            <div>
+                <input id="tex" type="text" style="width:300px" />
+            </div>
+            <br />
+            <div>
+                <div id="captcha">
+                </div>
+            </div><div>
+                <input id="submit" type="submit" value="提交" />
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    var submit = $("#submit");//按钮
+    var tex = $("#tex");
+    var captcha = $("#captcha");
+    var geeteststr = "";
+    //页面加载验证码
+    $(function () {
+        Geetest();
+    })
+    submit.click(function () {
+        var geetest_challenge = $(".geetest_challenge");
+        var geetest_validate = $(".geetest_validate");
+        var geetest_seccode = $(".geetest_challenge");
+        $.ajax({
+            url: "/Geetest/CheckGeeTestResult",
+            type: 'POST',
+            data: JSON.stringify(
+                {
+                    geetest_challenge: geetest_challenge.val(),
+                    geetest_validate: geetest_validate.val(),
+                    geetest_seccode: geetest_seccode.val()
+                }),
+            dataType: "JSON",
+            success: function (data) {
+                geeteststr = data;
+                if (tex.val() == null || tex.val() == "") {
+                    alert("请输入文本框的值");
+                }
+                else if (geeteststr < 1) {
+                    alert("请进行滑动验证");
+                } else {
+                    alert("滑动验证成功！");
+                }
+            }
+        });
+    });
+
+    //初始化验证码
+    function Geetest() {
+        var handler = function (captchaObj) {
+            // 将验证码加到id为captcha的元素里
+            captchaObj.appendTo("#captcha");
+        };
+        $.ajax({
+            // 获取id，challenge，success（是否启用failback）
+            url: "/Geetest",
+            type: "get",
+            dataType: "json", // 使用jsonp格式
+            success: function (data) {
+                // 使用initGeetest接口
+                // 参数1：配置参数，与创建Geetest实例时接受的参数一致
+                // 参数2：回调，回调的第一个参数验证码对象，之后可以使用它做appendTo之类的事件
+                initGeetest({
+                    gt: data.gt,
+                    challenge: data.challenge,
+                    product: "float", // 产品形式
+                    offline: !data.success
+                }, handler);
+            }
+        });
+    }
+
+</script>
